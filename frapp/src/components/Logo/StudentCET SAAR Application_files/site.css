@@ -1,0 +1,41 @@
+﻿body {
+    /*padding-top: 50px;
+    padding-bottom: 20px;*/
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 100%;
+}
+#news-ticker .panel-heading.panel1{ background: #0f4f96;color:#fff !important;padding:16px 19px;border-radius:15px  15px 0px 0px;border-bottom:none !important;}
+#news-ticker .panel{ border: medium none; box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2); border-radius:15px; margin-bottom: 20px; }
+	
+#news-ticker .panel-footer{ border-radius:0px  0px 15px 15px; border-top:1px solid rgba(0,0,0,0.015);}
+#news-ticker .pagination{ border-radius: 25px;
+    box-shadow: 4px 4px 7px rgba(0, 0, 0, 0.05);
+    margin: 0; }
+#news-ticker .pagination li a.prev{ border-bottom-left-radius: 25px; border-top-left-radius: 25px; margin-left: 0; }
+	#news-ticker .pagination li a.next{ border-bottom-right-radius: 25px; border-top-right-radius: 25px; }
+	.pagination>li>a, .pagination>li>span{ padding: 7px 4px 0px 6px !important; } 
+	#news-ticker img{ height:50px; width:50px; margin-right:10px; }
+	.title-text{ margin-top: 50px;
+    margin-bottom: 30px;
+    color: #00BCD4;
+    text-shadow: 3px 3px 0px #EEEEEE;
+    letter-spacing: 1px;
+    font-weight: bold; } 

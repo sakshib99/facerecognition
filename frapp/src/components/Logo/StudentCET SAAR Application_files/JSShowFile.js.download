@@ -1,0 +1,235 @@
+﻿
+function ShowScanDocumentPopup(stdfrm_folder_name, application_no, docNamewithExe, doc_name,CGFolder) {
+    debugger;
+    document.getElementById("lblfileobjname").innerHTML = '';
+    document.getElementById("lbldocconstant").innerHTML = '';
+    document.getElementById("idCurrentOpenDoc").value = '';
+    document.getElementById("hd_course_group_id").value = '';
+
+
+    if (document.getElementById('btnmodelsave') != null)
+        document.getElementById('btnmodelsave').setAttribute("style", "display:none;");
+
+    var scanPath = "../ScanDocs/" + stdfrm_folder_name + "/" + application_no + "/" + docNamewithExe;
+
+    if (CGFolder != undefined)
+        scanPath = "../ScanDocs/" + stdfrm_folder_name + "/" + application_no + "/" + CGFolder + "/" +docNamewithExe;
+
+    var options = { "backdrop": "static", keyboard: true };
+    $.get(scanPath)
+    .done(function () {
+        document.getElementById("iframeScan").src = scanPath;
+        document.getElementById("showdocname").innerHTML = doc_name
+        if (document.getElementById('btnDeleteDoc') != null)
+            document.getElementById('btnDeleteDoc').removeAttribute("style", "display:none;");
+        $('#myModalDoc').modal(options);
+        $('#myModalDoc').modal('show');
+    }).fail(function () {
+        var docFullName = doc_name;
+        document.getElementById("iframeScan").src = "../ScanDocs/htmPDFNotFound.html?DocName=" + docFullName;
+        if (document.getElementById('btnDeleteDoc') != null)
+            document.getElementById('btnDeleteDoc').setAttribute("style", "display:none;");
+
+        $('#myModalDoc').modal(options);
+        $('#myModalDoc').modal('show');
+    })
+}
+
+function ShowPreviewPopupSave(docconstant, fileobjname, tempurl, doc_name, course_group_id) {
+    //alert("ok");
+    document.getElementById("lblfileobjname").innerHTML = fileobjname;
+    document.getElementById("lbldocconstant").innerHTML = docconstant;
+    document.getElementById("hd_course_group_id").value = course_group_id;
+
+    if (document.getElementById('btnmodelsave') != null)
+        document.getElementById('btnmodelsave').removeAttribute("style", "display:none;");
+
+    var options = { "backdrop": "static", keyboard: true };
+    $.get(tempurl)
+    .done(function () {
+        document.getElementById("iframeScan").src = tempurl;
+        document.getElementById("showdocname").innerHTML = "Is this readable and correct " + doc_name + " to upload?";
+        if (document.getElementById('btnDeleteDoc') != null)
+            document.getElementById('btnDeleteDoc').setAttribute("style", "display:none;");
+        $('#myModalDoc').modal(options);
+        $('#myModalDoc').modal('show');
+    }).fail(function () {
+        var docFullName = doc_name;
+        document.getElementById("iframeScan").src = "../ScanDocs/htmPDFNotFound.html?DocName=" + docFullName;
+        if (document.getElementById('btnDeleteDoc') != null)
+            document.getElementById('btnDeleteDoc').setAttribute("style", "display:none;");
+        $('#myModalDoc').modal(options);
+        $('#myModalDoc').modal('show');
+    })
+
+}
+
+
+
+function fnModelDocClose() {
+    debugger;
+    //alert("ok");
+    document.getElementById("iframeScan").src = "";
+    var cidCurrentOpenDoc = document.getElementById('idCurrentOpenDoc').value;
+    if (cidCurrentOpenDoc != '') {
+        document.getElementById(cidCurrentOpenDoc).className = "btn-file-input";
+    }
+
+    var sfileobjname = document.getElementById("lblfileobjname").innerHTML;
+    var fileInput = document.getElementById(sfileobjname);
+    if (fileInput != null) {
+        fileInput.value = "";
+    }
+}
+
+
+var loadImage = function (obj, event, imgName) {
+    debugger;
+    var url = event.target.files[0].name;
+    document.getElementById("btn_" + obj.name).className = "btn-attached-file-input";
+
+    var ext = url.substring(url.lastIndexOf('.') + 1).toLowerCase();
+
+    var length = event.target.files[0].size;
+    if (ext == "bmp" || ext == "png" || ext == "jpeg" || ext == "jpg") {
+        if ((length / 1024) >= 50) {
+            alert(['Size should not exceed more than 50 kbs.']);
+            document.getElementById("btn_" + obj.name).className = "btn-file-input";
+            //$('input[type="file"]').each(function () { if(this.name==obj.name) this.value=""});
+            obj.value = "";
+            if (imgName == "imgStudPhoto")
+                document.getElementById(imgName).src = "/ScanDocs/StudentPhoto.png";
+        }
+        else {
+            var reader = new FileReader();
+            reader.onload = function () {
+                document.getElementById(imgName).src = reader.result;
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    }
+    else {
+        alert(['Please upload document in bmp, png, jpeg, jpg format with size maximum 50 KB']);
+        document.getElementById("btn_" + obj.name).className = "btn-file-input";
+        //$('input[type="file"]').each(function () { if(this.name==obj.name) this.value=""});
+        obj.value = "";
+        if (imgName == "imgStudPhoto")
+            document.getElementById(imgName).src = "/ScanDocs/StudentPhoto.png";
+    }
+};
+
+var loadFileDoc = function (obj, event, docconstant, course_group_id, isImage) {
+    //docconstant send only for cet/academic other wise dont pass
+    if (isImage == undefined) {
+        isImage = 'N'
+    }
+
+    debugger;
+    var doc_name = ''
+    if (event.target.files.length > 0) {
+        var pdffile = event.target.files[0];
+        var pdffile_url = URL.createObjectURL(pdffile);
+        var url = event.target.files[0].name;
+        document.getElementById("btn" + obj.name).className = "btn-attached-file-input";
+        document.getElementById("idCurrentOpenDoc").value = "btn" + obj.name;
+
+        var ext = url.substring(url.lastIndexOf('.') + 1).toLowerCase();
+        var length = event.target.files[0].size;
+        var minSize = 9;
+        var maxSize = 250;
+        if (docconstant == 'stdfrm_cet_hall_ticket' || docconstant == 'stdfrm_cet_mark_sheet' || docconstant == 'stdfrm_cet_appform' || docconstant == 'stdfrm_cet_undertaking')
+            maxSize = 300;
+        if (isImage == 'Y')
+            maxSize = 50;
+
+        if (isImage == 'N' && ext == "pdf") {
+            if ((length / 1024) < minSize || (length / 1024) > maxSize) {
+                alert(['Minimum file size is ' + minSize + 'KB and Maximum size is ' + maxSize + 'KB']);
+                document.getElementById("btn" + obj.name).className = "btn-file-input";
+                //$('input[type="file"]').each(function () { if(this.name==obj.name) this.value=""});
+                obj.value = "";
+            }
+            else {
+                //$("#myModalDoc").modal();                      
+                ShowPreviewPopupSave(docconstant, obj.name, pdffile_url, doc_name, course_group_id);
+            }
+        }
+        else if (isImage == 'Y' && (ext == "bmp" || ext == "png" || ext == "jpeg" || ext == "jpg")) {
+          
+            if ((length / 1024) >= maxSize) {
+                alert(['Minimum file size is ' + minSize + 'KB and Maximum size is ' + maxSize + 'KB']);
+                document.getElementById("btn" + obj.name).className = "btn-file-input";
+                //$('input[type="file"]').each(function () { if(this.name==obj.name) this.value=""});
+                obj.value = "";
+            }
+            else {
+                //$("#myModalDoc").modal();                      
+                ShowPreviewPopupSave(docconstant, obj.name, pdffile_url, doc_name, course_group_id);
+            }
+        }
+        else {
+            if (isImage == 'Y')
+                alert(['Please upload document in bmp, png, jpeg, jpg format with size maximum ' + maxSize + ' KB']);
+            else
+                alert(['Please upload document in pdf format with size maximum ' + maxSize + ' KB']);
+
+            document.getElementById("btn" + obj.name).className = "btn-file-input";
+            obj.value = "";
+        }
+    }
+    else {
+        document.getElementById("btn" + obj.name).className = "btn-file-input";
+        //$('input[type="file"]').each(function () { if(this.name==obj.name) this.value=""});
+        obj.value = "";
+    }
+};
+
+//Added new function to dynamicall create college path
+function ShowScanDocumentPopupClg(colg_code, docNamewithExe, doc_name) {
+    var scanPath = "http://14.143.45.237:8105/ARAVersion2/ScanDocs/CollegeCertificates/" + colg_code + "/" + docNamewithExe;
+    var options = { "backdrop": "static", keyboard: true };
+    $.get(scanPath)
+    .done(function () {
+        document.getElementById("iframeScan").src = scanPath;
+        document.getElementById("showdocname").innerHTML = doc_name
+        if (document.getElementById('btnDeleteDoc') != null)
+            document.getElementById('btnDeleteDoc').removeAttribute("style", "display:none;");
+        $('#myModalDoc').modal(options);
+        $('#myModalDoc').modal('show');
+        document.getElementById('load').style.visibility = "hidden";
+    }).fail(function () {
+        var docFullName = doc_name;
+        document.getElementById("iframeScan").src = "../ScanDocs/htmPDFNotFound.html?DocName=" + docFullName;
+        if (document.getElementById('btnDeleteDoc') != null)
+            document.getElementById('btnDeleteDoc').setAttribute("style", "display:none;");
+        $('#myModalDoc').modal(options);
+        $('#myModalDoc').modal('show');
+        document.getElementById('load').style.visibility = "hidden";
+    })
+
+
+}
+function ShowGuidancePopup(docNamewithExe, doc_name) {
+    document.getElementById('load').style.visibility = "visible";
+    var scanPath = "../ScanDocs/Guidance/" + docNamewithExe;
+    document.getElementById('btnmodelsave').setAttribute("style", "display:none;");
+    var options = { "backdrop": "static", keyboard: true };
+    $.get(scanPath)
+    .done(function () {
+        document.getElementById("iframeScan").src = scanPath;
+        document.getElementById("showdocname").innerHTML = doc_name
+        if (document.getElementById('btnDeleteDoc') != null)
+            document.getElementById('btnDeleteDoc').removeAttribute("style", "display:none;");
+        $('#myModalDoc').modal(options);
+        $('#myModalDoc').modal('show');
+        document.getElementById('load').style.visibility = "hidden";
+    }).fail(function () {
+        var docFullName = doc_name;
+        document.getElementById("iframeScan").src = "../ScanDocs/htmPDFNotFound.html?DocName=" + docFullName;
+        if (document.getElementById('btnDeleteDoc') != null)
+            document.getElementById('btnDeleteDoc').setAttribute("style", "display:none;");
+        $('#myModalDoc').modal(options);
+        $('#myModalDoc').modal('show');
+        document.getElementById('load').style.visibility = "hidden";
+    })
+}

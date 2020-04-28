@@ -1,0 +1,241 @@
+﻿
+
+//Validations events-------------------------------------//
+function isNumberKey(evt) {
+    var charCode = (evt.which) ? evt.which : event.keyCode;
+    if (charCode != 46 && charCode > 31
+      && (charCode < 48 || charCode > 57))
+        return false;
+    return true;
+}
+function isPhoneNumberKey(evt) {
+    var charCode = (evt.which) ? evt.which : event.keyCode;
+    if (charCode != 45 && charCode != 46 && charCode > 32
+      && (charCode < 48 || charCode > 57))
+        return false;
+    return true;
+}
+function noNumerics(evt) {   
+    var charCode = (evt.which) ? evt.which : event.keyCode;    
+    if ((charCode >= 48) && (charCode <= 57) || (charCode == 32) || (charCode >= 0) && (charCode <= 47) || (charCode >= 58)
+        && (charCode <= 64) || (charCode >= 91) && (charCode <= 96) || (charCode >= 123) && (charCode <= 127))
+        return false;
+    return true;
+}
+function noNumericswithspace(evt) {
+    var charCode = (evt.which) ? evt.which : event.keyCode;
+
+    if ((charCode >= 48) && (charCode <= 57) || (charCode >= 0) && (charCode <= 31) || (charCode >= 33) && (charCode <= 47) || (charCode >= 58)
+        && (charCode <= 64) || (charCode >= 91) && (charCode <= 96) || (charCode >= 123) && (charCode <= 127))
+        return false;
+    return true;
+}
+
+function noSpecialCharacter(evt) {   
+    var charCode = (evt.which) ? evt.which : event.keyCode;
+    
+    if ((charCode >= 32) && (charCode <= 47) || (charCode >= 58)
+        && (charCode <= 64) || (charCode >= 91) && (charCode <= 96) || (charCode >= 123) && (charCode <= 127))
+        return false;
+    return true;
+}
+
+function limitText(limitField, limitNum) {
+    if (limitField.value.length > limitNum) {
+        limitField.value = limitField.value.substring(0, limitNum);
+    }
+}
+
+/*All Common Dropdown Fill Methods*/
+/*Required same control name and id*/
+function fnFillDistricts(obj, mstate_id, mdistrict_id, mtaluka_id) {
+    debugger;
+    //document.getElementById('load').style.visibility = "visible";
+    var state_id = $(obj).val();
+    if (!(state_id == '' || state_id == "")) {
+
+        $.ajax({
+            url: '../Home/FillDistricts',
+            type: "GET",
+            dataType: "JSON",
+            data: { state_id: state_id },
+            success: function (Districts) {
+                $("#ddlTaluka").html(""); // clear before appending new list
+                $("#ddlDistrict").html(""); // clear before appending new list
+                $("#ddlDistrict").html('<option value="">--Select District--</option>');
+                $.each(Districts, function (i, dist) {
+                    $("#ddlDistrict").append(
+                        $('<option></option>').val(dist.dist_id).html(dist.dist_name));
+                });
+
+                if (mstate_id == state_id) {
+                    if (!(mstate_id == '0' && mstate_id == '')) {
+                        $("#ddlDistrict").val(mdistrict_id);
+                        FillTalukas($("#ddlDistrict"), mdistrict_id, mtaluka_id);
+                    }
+                }
+                //document.getElementById('load').style.visibility = "hidden";
+            }
+        });
+    }
+}
+
+function FillTalukas(obj, mdistrict_id, mtaluka_id) {
+    //document.getElementById('load').style.visibility = "visible";
+    var dist_id = $(obj).val();
+    $.ajax({
+        url: '../Home/FillTalukas',
+        type: "GET",
+        dataType: "JSON",
+        data: { dist_id: dist_id },
+        success: function (Talukas) {
+            $("#ddlTaluka").html(""); // clear before appending new list
+            $("#ddlTaluka").html('<option value="">--Select Taluka--</option>');
+            $.each(Talukas, function (i, tal) {
+                $("#ddlTaluka").append(
+                    $('<option></option>').val(tal.taluka_id).html(tal.taluka_name));
+            });
+
+            if (mdistrict_id == dist_id) {
+                if (mdistrict_id != '') {
+                    $("#ddlTaluka").val(mtaluka_id);
+                }
+            }
+
+             //document.getElementById('load').style.visibility = "hidden";
+        }
+
+    });
+}
+
+/*=============================*/
+
+function FillDistrictsByID(obj, strDistObjID, strTalukaObjID, mstate_id, mdistrict_id, mtaluka_id) {
+    document.getElementById('load').style.visibility = "visible";
+    var state_id = $(obj).val();
+    $.ajax({
+        url: '../Home/FillDistricts',
+        type: "GET",
+        dataType: "JSON",
+        data: { state_id: state_id },
+        success: function (Districts) {
+            debugger;
+            $(strTalukaObjID).html(""); // clear before appending new list
+            $(strDistObjID).html(""); // clear before appending new list
+            $(strDistObjID).html('<option value="">--Select District--</option>');
+            $.each(Districts, function (i, dist) {
+                $(strDistObjID).append(
+                    $('<option></option>').val(dist.dist_id).html(dist.dist_name));
+            });
+
+            if (mstate_id == state_id) {
+                if (mstate_id != '') {
+                    $(strDistObjID).val(mdistrict_id);
+                    //$(strDistObjID).change();
+                    FillTalukasByID(strDistObjID, strTalukaObjID, mdistrict_id, mtaluka_id);
+
+                }
+            }
+            document.getElementById('load').style.visibility = "hidden";
+        }
+    });
+}
+
+function FillTalukasByID(obj, strTalukaObjID, mdistrict_id, mtaluka_id) {
+    document.getElementById('load').style.visibility = "visible";
+    var dist_id = $(obj).val(); 
+
+    $.ajax({
+        url: '../Home/FillTalukas',
+        type: "GET",
+        dataType: "JSON",
+        data: { dist_id: dist_id },
+        success: function (Talukas) {
+            $(strTalukaObjID).html(""); // clear before appending new list
+            $(strTalukaObjID).html('<option value="">--Select Taluka--</option>');
+            $.each(Talukas, function (i, tal) {
+                $(strTalukaObjID).append(
+                    $('<option></option>').val(tal.taluka_id).html(tal.taluka_name));
+            });
+            if (mdistrict_id == dist_id) {
+                if (mdistrict_id != '') {
+                    $(strTalukaObjID).val(mtaluka_id);
+                }
+            }
+            document.getElementById('load').style.visibility = "hidden";
+        }
+    });
+}
+
+/* Fill SSK  */
+function FillTalukasSSKByID(obj, strTalukaObjID, strSSKObjID, mdistrict_id, mtaluka_id, mssk_id) {
+    document.getElementById('load').style.visibility = "visible";
+    var dist_id = $(obj).val();
+    $.ajax({
+        url: '../Home/FillSSKTalukas',
+        type: "GET",
+        dataType: "JSON",
+        data: { dist_id: dist_id },
+        success: function (Talukas) {
+            debugger;
+            $(strTalukaObjID).html(""); // clear before appending new list
+            $(strSSKObjID).html(""); // clear before appending new list
+            $(strTalukaObjID).html('<option value="">--Select Taluka--</option>');
+            $.each(Talukas, function (i, tal) {
+                $(strTalukaObjID).append(
+                    $('<option></option>').val(tal.taluka_id).html(tal.taluka_name));
+            });
+            if (mdistrict_id == dist_id) {
+                if (mdistrict_id != '') {
+                    $(strTalukaObjID).val(mtaluka_id);
+                    //$(strDistObjID).change();
+                    FillSSKsByID(strTalukaObjID, mtaluka_id, mssk_id);
+                }
+            }
+            document.getElementById('load').style.visibility = "hidden";
+        }
+    });
+}
+function FillSSKsByID(obj, mtaluka_id, mssk_id) {
+    //document.getElementById('load').style.visibility = "visible";
+    var taluka_id = $(obj).val();
+    $.ajax({
+        url: '../Home/FillSSK',
+        type: "GET",
+        dataType: "JSON",
+        data: { taluka_id: taluka_id },
+        success: function (SSKs) {
+            $("#ddlSSK").html(""); // clear before appending new list
+            $("#ddlSSK").html('<option value="">--Select Setu Suvidha Kendra--</option>');
+            $.each(SSKs, function (i, ssk) {
+                $("#ddlSSK").append(
+                    $('<option></option>').val(ssk.ssk_id).html(ssk.ssk_name));
+            });
+            if (mtaluka_id == taluka_id) {
+                if (mtaluka_id != '') {
+                    $("#ddlSSK").val(mssk_id);
+                }
+            }
+
+            //document.getElementById('load').style.visibility = "hidden";
+        }
+
+    });
+}
+/* Fill SSK  */
+/*END All Common Dropdown Fill Methods*/
+var _MS_PER_DAY = 1000 * 60 * 60 * 24;
+// a and b are javascript Date objects
+function dateDiffInDays(a, b) {
+    // Discard the time and time-zone information.
+    var utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
+    var utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
+    return Math.floor((utc2 - utc1) / _MS_PER_DAY);
+}
+function dateDiffInHours(a, b) {
+    return b.getHours() - a.getHours();
+}
+function dateDiffInMinutes(a, b) {
+    return b.getMinutes() - a.getMinutes();
+}
+
